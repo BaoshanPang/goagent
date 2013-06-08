@@ -1061,10 +1061,15 @@ class Common(object):
 
         self.LOVE_ENABLE = self.CONFIG.getint('love', 'enable')
         self.LOVE_TIP = self.CONFIG.get('love', 'tip').encode('utf8').decode('unicode-escape').split('|')
-
-        self.HOSTS = collections.OrderedDict(self.CONFIG.items('hosts'))
-        self.HOSTS_MATCH = collections.OrderedDict((re.compile(k).search, v) for k, v in self.HOSTS.items() if not re.search(r'\d+$', k))
-        self.HOSTS_CONNECT_MATCH = collections.OrderedDict((re.compile(k).search, v) for k, v in self.HOSTS.items() if re.search(r'\d+$', k))
+        if sys.version_info[0] == 2 and sys.version_info[1] <= 6: 
+            import ordereddict
+            self.HOSTS = ordereddict.OrderedDict(self.CONFIG.items('hosts'))
+            self.HOSTS_MATCH = ordereddict.OrderedDict((re.compile(k).search, v) for k, v in self.HOSTS.items() if not re.search(r'\d+$', k))
+            self.HOSTS_CONNECT_MATCH = ordereddict.OrderedDict((re.compile(k).search, v) for k, v in self.HOSTS.items() if re.search(r'\d+$', k))
+        else:
+            self.HOSTS = collections.OrderedDict(self.CONFIG.items('hosts'))
+            self.HOSTS_MATCH = collections.OrderedDict((re.compile(k).search, v) for k, v in self.HOSTS.items() if not re.search(r'\d+$', k))
+            self.HOSTS_CONNECT_MATCH = collections.OrderedDict((re.compile(k).search, v) for k, v in self.HOSTS.items() if re.search(r'\d+$', k))
 
         random.shuffle(self.GAE_APPIDS)
         self.GAE_FETCHSERVER = '%s://%s.appspot.com%s?' % (self.GOOGLE_MODE, self.GAE_APPIDS[0], self.GAE_PATH)
